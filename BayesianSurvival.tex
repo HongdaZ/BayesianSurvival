@@ -182,10 +182,131 @@
 		\begin{itemize}
 			\item It is well known that survival models are very hard to fit, especially with the presence of complex censoring schemes. With the MCMC methods, fitting the survival data is straight forward.
 			\item Frequentist methods require large sample size while MCMC sampling methods can help make exact inference for any sample size.
-			\item  
+			\item  In frequentist paradigm, variance is estimated asymptotically. On the contrary, it's trivial to sample from posterior distributions using MCMC methods and the variance is easily obtained.
+			\item Using Bayesian paradigm, it's natural to incorporate prior information by specifying prior distributions.
 		\end{itemize}
 	\end{frame}
 	
+	\begin{frame}
+		\frametitle{Introduction}
+		Advantages of Bayesian paradigm (cont.)
+		\begin{itemize}
+			\item Frequentist inference can be regarded as a special case of Bayesian inference for many models. 
+			\item In the Bayesian paradigm, model selection is easily done via Bayes factors or other criteria, e.g. Bayesian information criterion (BIC). The Bayes factors and model selection criteria can be exactly computed via MCMC methods. On the other hand, there is no unified methodology for comparing non-nested models in frequentist paradigm. Furthermore, comparison of nested models in frequentist paradigm usually require asymptotic arguments which rely on a large sample size.
+			\item  In principle, missing covariate or response data is not a big problem that they are treated as unknown parameters in Bayesian paradigm. The missing values only require an extra layer in the sampling methods. In contrast, dealing with missing values in frequentist paradigm is quite complicated and require more computationally intensive methods.
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Parametric Models}
+		The most fundamental parametric model in survival analysis is exponential model. Suppose there are independent identically distributed  (i.i.d.) survival times $\boldsymbol{y} = (y_1, y_2, \dots, y_n)'$, each having an exponential distribution with parameter $\lambda$, denoted by $\mathcal{E}(\lambda)$. Let $\boldsymbol{\nu} = (\nu_1, \nu_2, \dots, \nu_n)'$ denote the censoring indicators, where $\nu_i = 0$ is $y_i$ is right censored and $\nu_i = 1$ if $y_i$ is a failure time. Let $f(y_i | \lambda) = \lambda\exp(-\lambda y_i)$ denote the density for $y_i$, $S(y_i | \lambda) = \exp(-\lambda y_i)$ denotes the survival function and $D = (n, \boldsymbol{y}, \boldsymbol{\nu})$ denotes the observed data. Then the likelihood function of $\lambda$ is given by
+		\[
+		L(\lambda | D) \prod_{i = 1}^{n} f(y_i | \lambda) ^ { \nu_i} S(y_i | \lambda) ^ {(1 - \nu_i)} = \lambda ^ d \exp(\lambda\sum_{i = 1}^{n}y_i),
+		\]
+		where $d = \sum_{i = 1}^{n}\nu_i$.
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Parametric Models}
+		The gamma prior is the conjugate prior for $\lambda$. Let $\mathcal{G}(\alpha_0, \lambda_0)$ denote the gamma distribution with parameters $(\alpha_0, \lambda_0)$. Then the density function is given by
+		\[
+		\pi(\lambda | \alpha_0, \lambda_0) \propto \lambda ^ {\alpha_0 - 1} \exp(-\lambda_0\lambda).
+		\]
+		Then the posterior distribution is given by
+		\begin{align*}
+			\pi(\lambda | D) & \propto L(\lambda | D) \pi(\lambda | \alpha_0, \lambda_0) \\
+			& \propto ( \lambda ^ {\sum_{i = 1}^{n}}\exp\{-\lambda\sum_{i = 1}^{n}y_i\})(\lambda ^ {\alpha_0 - 1}\exp( -\lambda_0\lambda)) \\
+			& = \lambda ^ {\alpha_0 + d - 1}\exp\{\lambda( \lambda_0 + \sum_{i = 1}^{n}y_i)\}.
+		\end{align*}
+	    Obviously, it is $\mathcal{G}(\alpha_0 + d, \lambda_0 + \sum_{i = 1}^{n}y_i)$.
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Parametric Models}
+		The posterior mean and variance are easily obtained by
+		\[
+		E(\lambda | D) = \frac{\alpha_0 + d}{\lambda_0 + \sum_{i = 1}^{n}y_i}
+		\]
+		and 
+		\[
+		\text{Var}(\lambda | D) = \frac{\alpha_0 + d}{(\lambda_0 + \sum_{i = 1}^{n}y_i) ^ 2}.
+		\]
+		The posterior predictive distribution of a new failure time $y_f$ is given by
+		\begin{align*}
+			\pi(y_f | D) & = \int_{0}^{\infty}\pi(y_f | \lambda) \pi(\lambda | D) d\lambda \\
+			& \propto\int_{0}^{\infty} \lambda ^ {\alpha_0 + d + 1 - 1}\exp\{-\lambda(y_f + \lambda_0 + \sum_{i = 1}^{n}y_i)\}d\lambda \\
+			& = \Gamma(\alpha_0 + d + 1)(\lambda_0 + \sum_{i = 1}^{n}y_i + y_f) ^ { -(d + \alpha_0 + 1)} \\
+			& \propto (\lambda_0 + \sum_{i = 1}^{n}y_i + y_f) ^ {-d + \alpha_0 + 1},
+		\end{align*}
+		which is an inverse beta distribution.
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Parametric Models}
+		Covariates can be introduced through $\lambda$ to build a regression model. Let $\boldsymbol{x}_i$ denote a $p\times1$ vector of covariates, $\boldsymbol{\beta}$ denote a $p\times1$ vector of regression coefficients, and $\phi(\cdot)$ denote a known function. Then let $\lambda_i = \phi( \boldsymbol{x}_i'\boldsymbol{\beta})$. Usually, $\phi(\cdot)$ takes the form of $\exp(\cdot)$. Then the likelihood function of regression coefficients is given by 
+		\begin{align*}
+			L(\boldsymbol{\beta} | D) & = \prod_{i = 1}^{n}f(y_i | \lambda_i) ^ {v_i}S(y_i | \lambda_i) ^ {1 - v_i} \\
+			& = \exp\{\sum_{i = 1}^{n}\nu_i\boldsymbol{x}_i'\boldsymbol{\beta}\}\exp\{-\sum_{i = 1}^{n}y_i\exp(\boldsymbol{x}_i'\boldsymbol{\beta})\}.
+		\end{align*}
+		Suppose we specify a $p-$dimensional normal prior for $\boldsymbol{\beta}$, denoted by $N_p(\boldsymbol{\mu}_0, \Sigma_0)$, with 
+		$\boldsymbol{\mu}_0$ as prior mean and $\Sigma_0$ as prior covariance matrix. Thus the posterior distribution of $\boldsymbol{\beta}$ is given by 
+		\[
+		\pi(\boldsymbol{\beta} | D) \propto L(\boldsymbol{\beta} | D)\pi(\boldsymbol{\beta} | \boldsymbol{\mu_0, \Sigma_0}),
+		\]
+		where $\pi(\boldsymbol{\beta} | \boldsymbol{\mu_0, \Sigma_0})$ is the multivariate normal distribution.
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Parametric Models}
+		Covariates can be introduced through $\lambda$ to build a regression model. Let $\boldsymbol{x}_i$ denote a $p\times1$ vector of covariates, $\boldsymbol{\beta}$ denote a $p\times1$ vector of regression coefficients, and $\phi(\cdot)$ denote a known function. Then let $\lambda_i = \phi( \boldsymbol{x}_i'\boldsymbol{\beta})$. Usually, $\phi(\cdot)$ takes the form of $\exp(\cdot)$. Then the likelihood function of regression coefficients is given by 
+		\begin{align*}
+			L(\boldsymbol{\beta} | D) & = \prod_{i = 1}^{n}f(y_i | \lambda_i) ^ {v_i}S(y_i | \lambda_i) ^ {1 - v_i} \\
+			& = \exp\{\sum_{i = 1}^{n}\nu_i\boldsymbol{x}_i'\boldsymbol{\beta}\}\exp\{-\sum_{i = 1}^{n}y_i\exp(\boldsymbol{x}_i'\boldsymbol{\beta})\}.
+		\end{align*}
+		Suppose we specify a $p-$dimensional normal prior for $\boldsymbol{\beta}$, denoted by $N_p(\boldsymbol{\mu}_0, \Sigma_0)$, with 
+		$\boldsymbol{\mu}_0$ as prior mean and $\Sigma_0$ as prior covariance matrix. Thus the posterior distribution of $\boldsymbol{\beta}$ is given by 
+		\[
+		\pi(\boldsymbol{\beta} | D) \propto L(\boldsymbol{\beta} | D)\pi(\boldsymbol{\beta} | \boldsymbol{\mu_0, \Sigma_0}),
+		\]
+		where $\pi(\boldsymbol{\beta} | \boldsymbol{\mu_0, \Sigma_0})$ is the multivariate normal distribution.
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Parametric Models}
+		The Weibull model is widely used and more flexible than the exponential model. Suppose there are i.i.d. random variables $\boldsymbol{y} = (y_1, y_2, \dots, y_n)'$, each having a Weibull distribution, denoted by $\mathcal{W}(\alpha, \gamma)$. We reparameterize the model by letting $\lambda = \log(\gamma)$. Then the density function of $y_i$ is given by 
+		\[
+		f(y_i | \alpha, \lambda) = \alpha y ^ {\alpha - 1}\exp(\lambda - \exp(\lambda)y ^ {\alpha}).
+		\] 
+		The likelihood function is given by
+		\begin{align*}
+			L(\alpha, \lambda | D) & = \prod_{i = 1}^{n}f(y_i | \alpha, \lambda) ^ {\nu_i}S(y_i | \alpha, \lambda) ^ {1 - \nu_i} \\
+			& = \alpha ^ d \exp\{d\lambda + \sum_{i = 1}^{n}(\nu_i(\alpha - 1)\log(y_i) - \exp(\lambda)y_i ^ {\alpha})\}.
+		\end{align*}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Parametric Models}
+		If we specify gamma prior, $\mathcal{G}(\alpha_0, \kappa_0)$, for $\alpha$ and normal prior, $N(\mu_0, \sigma_0 ^ 2)$, for $\lambda$. Then the joint posterior distribution of $(\alpha, \lambda)$ is given by
+		\begin{equation*}
+			\begin{split}
+				\pi(\alpha, \lambda | D) & \propto L(\alpha, \lambda | D) \pi(\alpha | \alpha_0, \kappa_0)\pi(\lambda | \mu_0, \sigma_0 ^ 2) \\
+				& = \alpha ^ {\alpha_0 + d - 1} \exp\{d\lambda + \sum_{i = 1}^{n}(\nu_i(\alpha - 1)\log(y_i) - \exp(\lambda)y_i ^ {\alpha}) \\ 
+				& \quad\quad\quad\quad\quad - \kappa_0\alpha - \frac{1}{2\sigma_0 ^ 2}(\lambda - \mu_0) ^ 2\}.
+			\end{split}
+		\end{equation*}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Parametric Models}
+		To build a regression model, covariates $\boldsymbol{x}_i$ can be introduced through $\lambda$ with $\lambda_i = \boldsymbol{x}_i'\boldsymbol{\beta}$. If we assume a $N_p(\mu_0, \Sigma_0)$ prior for $\boldsymbol{\beta}$ and a $\mathcal{G}(\alpha_0, \kappa_0)$ prior for $\alpha$, then we are let to the joint posterior distribution
+		\begin{equation*}
+			\begin{split}
+				\pi(\boldsymbol{\beta, \alpha | D}) & \propto \alpha ^ {\alpha_0 + d - 1}\exp\{\sum_{i = 1}^{n}(\nu_i\boldsymbol{x}_i'\boldsymbol{\beta} + \nu_i(\alpha - 1)\log(y_i) - y_i ^ {\alpha}\exp( \boldsymbol{x}_i'\boldsymbol{\beta})) \\
+				& \quad\quad - \kappa_0\alpha - \frac{1}{2}(\boldsymbol{\beta} - \boldsymbol{\mu_0})' \Sigma_0 ^ {-1}(\boldsymbol{\beta} - \boldsymbol{\mu_0})\}.			
+			\end{split}
+		\end{equation*}
+	\end{frame}
+
 	\begin{frame}[allowframebreaks]
 		\begin{singlespace}
 			\interlinepenalty=10000	% prevents bib items from splitting across pages

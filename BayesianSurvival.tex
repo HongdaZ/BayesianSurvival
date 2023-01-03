@@ -376,6 +376,11 @@
 		\end{equation*}
 		where $\delta_{ij} = 1$ if the $i ^ {th}$ subject failed or was censored in the $j ^ {th}$ interval, and $0$ otherwise, $\boldsymbol{x}_i' = (x_{i1, x_{i2}, \dots, x_{ip}})$ denotes the $p\times1$ vector of covariates for the $i ^ {th}$ subject, and $\boldsymbol{\beta} = (\beta_1, \beta_2, \dots, \beta_p)'$ is the corresponding vector of regression coefficients.
 	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Semiparametric Models}
+		A common prior of the baseline hazard $\boldsymbol{\lambda}$ is the independent gamma prior $\lambda_j\sim\mathcal{G}(\alpha_{0j}, \lambda_{0j})$ for $j = 1, 2, \dots, J$. Another approach is to build a prior correlation among the $\lambda_j$'s using a correlated prior $\psi\sim N(\psi_0, \Sigma_{\psi})$, where $\psi_j = \log(\lambda_j)$ for $j = 1, 2, \dots, J$.
+	\end{frame}
 	\begin{frame}[allowframebreaks]
 		\begin{singlespace}
 			\interlinepenalty=10000	% prevents bib items from splitting across pages

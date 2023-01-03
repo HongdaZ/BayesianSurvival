@@ -199,6 +199,8 @@
 	
 	\begin{frame}
 		\frametitle{Parametric Models}
+		\textbf{Exponential Model}
+		
 		The most fundamental parametric model in survival analysis is exponential model. Suppose there are independent identically distributed  (i.i.d.) survival times $\boldsymbol{y} = (y_1, y_2, \dots, y_n)'$, each having an exponential distribution with parameter $\lambda$, denoted by $\mathcal{E}(\lambda)$. Let $\boldsymbol{\nu} = (\nu_1, \nu_2, \dots, \nu_n)'$ denote the censoring indicators, where $\nu_i = 0$ is $y_i$ is right censored and $\nu_i = 1$ if $y_i$ is a failure time. Let $f(y_i | \lambda) = \lambda\exp(-\lambda y_i)$ denote the density for $y_i$, $S(y_i | \lambda) = \exp(-\lambda y_i)$ denotes the survival function and $D = (n, \boldsymbol{y}, \boldsymbol{\nu})$ denotes the observed data. Then the likelihood function of $\lambda$ is given by
 		\[
 		L(\lambda | D) \prod_{i = 1}^{n} f(y_i | \lambda) ^ { \nu_i} S(y_i | \lambda) ^ {(1 - \nu_i)} = \lambda ^ d \exp(\lambda\sum_{i = 1}^{n}y_i),
@@ -258,21 +260,8 @@
 	
 	\begin{frame}
 		\frametitle{Parametric Models}
-		Covariates can be introduced through $\lambda$ to build a regression model. Let $\boldsymbol{x}_i$ denote a $p\times1$ vector of covariates, $\boldsymbol{\beta}$ denote a $p\times1$ vector of regression coefficients, and $\phi(\cdot)$ denote a known function. Then let $\lambda_i = \phi( \boldsymbol{x}_i'\boldsymbol{\beta})$. Usually, $\phi(\cdot)$ takes the form of $\exp(\cdot)$. Then the likelihood function of regression coefficients is given by 
-		\begin{align*}
-			L(\boldsymbol{\beta} | D) & = \prod_{i = 1}^{n}f(y_i | \lambda_i) ^ {v_i}S(y_i | \lambda_i) ^ {1 - v_i} \\
-			& = \exp\{\sum_{i = 1}^{n}\nu_i\boldsymbol{x}_i'\boldsymbol{\beta}\}\exp\{-\sum_{i = 1}^{n}y_i\exp(\boldsymbol{x}_i'\boldsymbol{\beta})\}.
-		\end{align*}
-		Suppose we specify a $p-$dimensional normal prior for $\boldsymbol{\beta}$, denoted by $N_p(\boldsymbol{\mu}_0, \Sigma_0)$, with 
-		$\boldsymbol{\mu}_0$ as prior mean and $\Sigma_0$ as prior covariance matrix. Thus the posterior distribution of $\boldsymbol{\beta}$ is given by 
-		\[
-		\pi(\boldsymbol{\beta} | D) \propto L(\boldsymbol{\beta} | D)\pi(\boldsymbol{\beta} | \boldsymbol{\mu_0, \Sigma_0}),
-		\]
-		where $\pi(\boldsymbol{\beta} | \boldsymbol{\mu_0, \Sigma_0})$ is the multivariate normal distribution.
-	\end{frame}
-	
-	\begin{frame}
-		\frametitle{Parametric Models}
+		\textbf{Weibull Model}
+		
 		The Weibull model is widely used and more flexible than the exponential model. Suppose there are i.i.d. random variables $\boldsymbol{y} = (y_1, y_2, \dots, y_n)'$, each having a Weibull distribution, denoted by $\mathcal{W}(\alpha, \gamma)$. We reparameterize the model by letting $\lambda = \log(\gamma)$. Then the density function of $y_i$ is given by 
 		\[
 		f(y_i | \alpha, \lambda) = \alpha y ^ {\alpha - 1}\exp(\lambda - \exp(\lambda)y ^ {\alpha}).
@@ -306,7 +295,87 @@
 			\end{split}
 		\end{equation*}
 	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Parametric Models}
+		\textbf{Log-Normal Model}
+		
+		The log-normal model is also a widely used parameter model. Suppose $y_i$ has a log-normal distribution with parameters $(\mu, \sigma ^ 2 )$, denoted by $\mathcal{LN}(\mu, \sigma ^ 2)$, then the density function is given by 
+		\[
+		f(y_i | \mu, \sigma) = (2\pi) ^ {-\frac{1}{2}}(y_i\sigma) ^ {-1}\exp\left\{-\frac{1}{2\sigma^2}(\log(y_i) - \mu) ^ 2\right\}.
+		\]
+		The likelihood function of $(\mu, \sigma)$ is given by 
+		\begin{equation*}
+			\begin{split}
+				L(\mu, \sigma | D) & = (2\pi\sigma^2) ^ {-d / 2}\exp\left\{-\frac{1}{2\sigma^2}\sum_{i = 1}^{n}\nu_i(\log(y_i) - \mu) ^ 2 \right\} \\
+				& \quad\quad \times\prod_{i = 1}^{n}y_i ^ {-\nu_i}(1 - \Phi(\frac{\log(y_i) - \mu}{\sigma})) ^ {1 - \nu_i}.
+			\end{split}
+		\end{equation*}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Parametric Models}
+		Let $\tau = 1 / \sigma ^ 2$. A typical choice of prior distribution is that $\mu | \tau \sim N(\mu_0, \frac{1}{\tau\tau_0})$ and $\tau \sim \mathcal{G}(\alpha_0 / 2, \lambda_0 / 2).$
+		Then the joint posterior distribution of $(\mu, \tau)$ is given by 
+		\[
+		\pi(\mu, \tau | D) \propto L(\mu, \sigma | D)\pi(\mu, \tau | \mu_0, \tau_0, \alpha_0, \lambda_0).
+		\]
+		which doesn't have a closed form. Metropolis algorithm is used to sample from this posterior distribution.
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Parametric Models}
+		\textbf{Gamma Model}
+		
+		If $y_i \sim \mathcal{G}(\alpha, \lambda)$, then 
+		\[
+		f(y_i | \alpha, \lambda) = \frac{1}{\Gamma(\alpha)}y_i ^ {\alpha - 1}\exp(\alpha\lambda - y_i\exp(\lambda)).
+		\]
+		The survival function is given by 
+		\[
+		S(y_i | \alpha, \lambda) = 1 - IG(\alpha, y_i\exp(\lambda)),
+		\] 
+		where $IG(\alpha, y_i\exp(\lambda)) = \frac{1}{\Gamma(\alpha)}\int_{0}^{y_i\exp(\lambda)}u ^ {\alpha - 1}\exp(-u)du$
+		is the incomplete gamma function. The likelihood function of $(\alpha, \lambda)$ is given by
+		\begin{equation*}
+			\begin{split}
+				L(\alpha, \lambda | D) & = \frac{1}{\Gamma(\alpha) ^ d}\exp\left\{d\alpha\lambda + \sum_{i = 1}^{n}\nu_i(\alpha\log(y_i) - y_i\exp(\lambda))\right\} \\
+				& \quad\quad\times\prod_{i = 1}^{n}y_i ^ {-\nu_i}(1 - IG(\alpha, y_i\exp(\lambda))) ^ {1 - \nu_i}.
+			\end{split}
+		\end{equation*}
+	\end{frame}
 
+	\begin{frame}
+		\frametitle{Parametric Models}
+		A typical choice of prior specification is to have $\alpha \sim \mathcal{G}(\alpha_0, \kappa_0)$ and $\lambda \sim N(\mu_0, \sigma_0 ^ 2)$ independently. Under this formulation, the joint posterior  distribution of $(\alpha, \lambda)$ is given by
+		\begin{equation*}
+			\begin{split}
+				\pi(\alpha, \lambda | D) & \propto\frac{1}{\Gamma(\alpha) ^ d}\exp\left\{d\alpha\lambda + \sum_{i = 1}^{n}\nu_i(\alpha\log(y_i) - y_i\exp(\lambda))\right\} \\
+				& \quad\quad\times\prod_{i = 1}^{n}y_i ^ {-\nu_i}(1 - IG(\alpha, y_i\exp(\lambda))) ^ {1 - \nu_i} \\
+				& \quad\quad\times\exp\left(-\kappa_0\alpha - \frac{1}{2\sigma_0 ^ 2}(\lambda - \mu_0) ^ 2\right).
+			\end{split}
+		\end{equation*}
+		The joint distribution doesn't have a closed form either.
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Semiparametric Models}
+		Since semiparametric models require fewer assumptions, they are more flexible than parametric models and can fit a wider variety of hazard functions. Nonparametric prior processess for the baseline hazard and cumulative hazard will be discussed. The focus will be on the Cox proportional hazards model. 
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Semiparametric Models}
+		\textbf{Piecewise Constant Hazard Model}
+		
+		Suppose the time axis can be split that $0 < s_1 < s_2 < \dots < s_J$, with $s_J > y_i$ for all $i = 1, 2, \dots, n$. Thus there are $J$ intervals $(s_1, s_2]$, $\dots$, $(s_{J - 1}, s_J]$. In the $j ^ {th}$ interval, the baseline hazard is assumed to be constant that $h_0(y) = \lambda_j$ for $y \in I_j = (s_{j - 1}, s_j]$. Let $D = (n, \boldsymbol{y}, X, \nu)$ denote the observed data. Let $\boldsymbol{\lambda} = (\lambda_1, \lambda_2, \dots, \lambda_J)'$. Then the likelihood function of $(\boldsymbol{\beta},\boldsymbol{\lambda})$ is given by
+		\begin{equation*}
+			\begin{split}
+				L(\boldsymbol{\beta}, \boldsymbol{\lambda} | D) & = \prod_{i = 1}^{n}\prod_{j = 1}^{J}(\lambda_j\exp(\boldsymbol{x}_i'\boldsymbol{\beta})) ^ {\delta_{ij}\nu_i}\exp\bigg\{-\delta_{ij}[\lambda_j(y_j - s_{j - 1})\\
+				& \quad\quad + \sum_{g = 1}^{j - 1}\lambda_g(s_g - s_{g - 1})]\exp(\boldsymbol{x_i}'\boldsymbol{\beta})\bigg\},
+			\end{split}
+		\end{equation*}
+		where $\delta_{ij} = 1$ if the $i ^ {th}$ subject failed or was censored in the $j ^ {th}$ interval, and $0$ otherwise, $\boldsymbol{x}_i' = (x_{i1, x_{i2}, \dots, x_{ip}})$ denotes the $p\times1$ vector of covariates for the $i ^ {th}$ subject, and $\boldsymbol{\beta} = (\beta_1, \beta_2, \dots, \beta_p)'$ is the corresponding vector of regression coefficients.
+	\end{frame}
 	\begin{frame}[allowframebreaks]
 		\begin{singlespace}
 			\interlinepenalty=10000	% prevents bib items from splitting across pages
